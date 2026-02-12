@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstantApp</title>
+    <style>
+        /* 1. Global Reset & Fonts */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* 2. Toolbar */
+        .toolbar {
+            background-color: #0288d1;
+            color: white;
+            width: 100%;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        /* 3. Main Container */
+        .main-content {
+            padding-top: 72px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        /* 4. Controls (Checkbox & Radio) */
+        .control-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            cursor: pointer;
+        }
+
+        .control-item input { display: none; }
+
+        .box, .circle {
+            height: 18px;
+            width: 18px;
+            border: 2px solid #5f6368;
+            margin-right: 16px;
+            transition: 0.2s;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .box { border-radius: 2px; }
+        .circle { border-radius: 50%; }
+
+        input:checked + .box { background: #0288d1; border-color: #0288d1; }
+        input:checked + .circle { border-color: #0288d1; border-width: 5px; }
+
+        /* 5. Android Main Buttons */
+        .android-btn {
+            width: 100%;
+            height: 48px;
+            margin: 16px 0;
+            background-color: #0288d1;
+            color: white;
+            border-radius: 2px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.25px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.26);
+        }
+
+        /* 6. ANDROID 7 NOUGAT ALERT (The Square One) */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none; /* Shown via JS */
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .alert-card {
+            background: #fff;
+            width: 280px;
+            border-radius: 2px; /* Square Android 7 style */
+            padding: 24px 24px 8px 24px;
+            box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14);
+        }
+
+        .alert-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: #212121;
+        }
+
+        .alert-body {
+            font-size: 16px;
+            color: #757575;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .alert-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .alert-action-btn {
+            background: none;
+            border: none;
+            color: #0288d1;
+            padding: 8px 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .alert-action-btn:active { background: rgba(0,0,0,0.05); }
+
+        /* Ripple Animation */
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-animation 0.5s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <h1 style="font-size: 20px; font-weight: 500; margin-left: 16px;">InstantApp</h1>
+    </div>
+
+    <div class="main-content">
+        <label class="control-item">
+            <input type="checkbox" checked>
+            <span class="box"></span>
+            Normal Checkbox
+        </label>
+
+       
+        </label>
+
+        <div id="alert-trigger" class="android-btn">Show Android 7 Alert</div>
+    </div>
+
+    <div id="overlay" class="alert-overlay">
+        <div class="alert-card">
+            <div class="alert-title">System Settings</div>
+            <div class="alert-body">Change your system preferences? This will apply to all connected accounts.</div>
+            <div class="alert-actions">
+                <button class="alert-action-btn" onclick="hideAlert()">Cancel</button>
+                <button class="alert-action-btn" onclick="hideAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Ripple & Alert Logic
+        const btn = document.getElementById('alert-trigger');
+        const overlay = document.getElementById('overlay');
+
+        btn.addEventListener('mousedown', function(e) {
+            const ripple = document.createElement('span');
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+            ripple.classList.add('ripple');
+            
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+            
+            // Show the Android 7 Alert
+            setTimeout(() => {
+                overlay.style.display = 'flex';
+            }, 200);
+        });
+
+        function hideAlert() {
+            overlay.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
